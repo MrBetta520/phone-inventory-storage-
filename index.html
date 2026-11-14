@@ -96,8 +96,8 @@
       <div class="scan-grid four">
         <label><b>客户</b><select id="receiveCustomer"><option value="">请选择客户</option></select></label>
         <label><b>1 快递单号（选填）</b><input id="tracking" placeholder="可扫描，也可按 Enter 跳过" autocomplete="off"></label>
-        <label><b>2 手机 IMEI（必填且唯一）</b><input id="imei" placeholder="扫描 IMEI 条码" autocomplete="off"></label>
-        <label><b>3 手机 UPC</b><input id="upc" placeholder="扫描 UPC 自动识别" autocomplete="off"></label>
+        <label><b>2 手机 IMEI（必填且唯一）</b><input id="imei" inputmode="numeric" placeholder="扫描 IMEI 条码" autocomplete="off"></label>
+        <label><b>3 手机 UPC</b><input id="upc" inputmode="numeric" placeholder="扫描 UPC 自动识别" autocomplete="off"></label>
       </div>
       <footer><span id="message">请先选择客户</span><button id="receiveBtn">确认入库</button></footer>
     </div>
@@ -146,7 +146,7 @@
     <div class="card">
       <h3>扫描 IMEI 出库 <small>自动匹配入库时的手机详情</small></h3>
       <div class="ship-scan-row">
-        <label><b>手机 IMEI</b><input id="shipImei" placeholder="扫描 IMEI 后按回车" autocomplete="off"></label>
+        <label><b>手机 IMEI</b><input id="shipImei" inputmode="numeric" placeholder="扫描 IMEI 后按回车" autocomplete="off"></label>
         <button id="shipScanBtn">确认出库</button>
       </div>
       <p id="shipMessage" class="muted">请扫描需要出库手机的 IMEI。</p>
@@ -193,6 +193,7 @@
 <script src="web-bridge.js"></script>
 <script src="data-utils.js"></script>
 <script src="app.js"></script>
+<script src="virtual-keyboard.js"></script>
 <script>
   if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
 </script>
