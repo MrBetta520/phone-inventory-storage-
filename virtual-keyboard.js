@@ -1,10 +1,11 @@
 "use strict";
 
 (() => {
-  const eligibleSelector='input:not([type]),input[type="text"],input[type="search"],input[type="number"],input[type="tel"]';
-  const numericIds=new Set(["imei","upc","shipImei","pUpc","adjustQuantity"]);
-  const enterIds=new Set(["tracking","imei","upc","shipImei","newCustomer"]);
-  const nextIds=new Set(["tracking","imei"]);
+  const manualInputIds=["newCustomer","pUpc","pModel","pColor","pCapacity"];
+  const eligibleSelector=manualInputIds.map(id=>`#${id}`).join(",");
+  const numericIds=new Set(["pUpc"]);
+  const enterIds=new Set(["newCustomer"]);
+  const nextIds=new Set();
   let activeInput=null;
   let caret=0;
   let layout="letters";
@@ -112,7 +113,7 @@
   }
 
   function closeKeyboard(){
-    if(activeInput){activeInput.classList.remove("keyboard-active");activeInput.dispatchEvent(new Event("change",{bubbles:true}));activeInput.blur();}
+    if(activeInput){activeInput.classList.remove("keyboard-active");activeInput.dispatchEvent(new Event("change",{bubbles:true}));}
     keyboard.hidden=true;document.body.classList.remove("keyboard-open");activeInput=null;
   }
 
@@ -130,24 +131,25 @@
   }
 
   function openKeyboard(input){
-    if(!input||input.disabled||input.readOnly)return;
+    if(!input||input.disabled||(input.readOnly&&input.dataset.virtualKeyboardInstalled!=="true"))return;
+    if(activeInput===input&&!keyboard.hidden)return;
     if(activeInput)activeInput.classList.remove("keyboard-active");
     activeInput=input;caret=input.selectionStart??String(input.value||"").length;
     layout=isNumeric(input)?"numeric":"letters";shifted=!input.value;
-    input.classList.add("keyboard-active");input.blur();
+    input.classList.add("keyboard-active");
     keyboard.hidden=false;document.body.classList.add("keyboard-open");render();
     setTimeout(()=>input.scrollIntoView({behavior:"smooth",block:"center"}),30);
   }
 
-  function installButtons(){
+  function installManualInputs(){
     document.querySelectorAll(eligibleSelector).forEach(input=>{
       if(input.dataset.virtualKeyboardInstalled)return;
       input.dataset.virtualKeyboardInstalled="true";
-      const wrapper=document.createElement("span");wrapper.className="keyboard-input-wrap";
-      input.parentNode.insertBefore(wrapper,input);wrapper.appendChild(input);
-      const button=document.createElement("button");button.type="button";button.className="virtual-keyboard-toggle";button.textContent="⌨️";button.setAttribute("aria-label",`打开${fieldLabel(input)}虚拟键盘`);
-      button.addEventListener("pointerdown",event=>event.preventDefault());
-      button.addEventListener("click",()=>openKeyboard(input));wrapper.appendChild(button);
+      input.setAttribute("inputmode","none");
+      input.readOnly=true;
+      input.setAttribute("aria-description","使用软件内置键盘输入");
+      input.addEventListener("focus",()=>openKeyboard(input));
+      input.addEventListener("click",()=>openKeyboard(input));
     });
   }
 
@@ -164,7 +166,12 @@
     else if(key==="action")pressAction();
     else{replaceSelection(key);if(layout==="letters"&&shifted){shifted=false;render();}}
   });
+  keyboard.addEventListener("pointerdown",event=>{if(event.target.closest("button"))event.preventDefault();});
   toolbarDone.addEventListener("click",pressAction);
   document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!keyboard.hidden)closeKeyboard();});
-  installButtons();
+  document.addEventListener("pointerdown",event=>{
+    if(keyboard.hidden||keyboard.contains(event.target)||event.target.closest(eligibleSelector))return;
+    closeKeyboard();
+  });
+  installManualInputs();
 })();
