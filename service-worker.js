@@ -1,4 +1,4 @@
-const CACHE="phonestock-v34-ios-keyboard-web-v5";
+const CACHE="phonestock-v34-ios-keyboard-web-v6";
 const ASSETS=["./","./index.html","./styles.css","./virtual-keyboard.js","./web-bridge.js","./data-utils.js","./app.js","./manifest.webmanifest","./icon.svg"];
 self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

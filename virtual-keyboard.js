@@ -22,6 +22,22 @@
   const toolbarDone=keyboard.querySelector("#iosKeyboardDone");
   const keys=keyboard.querySelector("#iosKeyboardKeys");
 
+  function syncKeyboardToViewport(){
+    const compact=window.matchMedia("(pointer:coarse), (max-width:850px)").matches;
+    const viewport=window.visualViewport;
+    if(compact&&viewport){
+      keyboard.style.left=`${viewport.offsetLeft}px`;
+      keyboard.style.width=`${viewport.width}px`;
+      keyboard.style.maxWidth="none";
+      keyboard.style.transform="none";
+    }else{
+      keyboard.style.left="";
+      keyboard.style.width="";
+      keyboard.style.maxWidth="";
+      keyboard.style.transform="";
+    }
+  }
+
   function fieldLabel(input){
     const explicit=input.closest("label")?.querySelector(":scope > b")?.textContent||input.closest("label")?.childNodes?.[0]?.textContent||input.placeholder||"手动输入";
     return String(explicit).trim().replace(/\s+/g," ")||"手动输入";
@@ -137,7 +153,7 @@
     activeInput=input;caret=input.selectionStart??String(input.value||"").length;
     layout=isNumeric(input)?"numeric":"letters";shifted=!input.value;
     input.classList.add("keyboard-active");
-    keyboard.hidden=false;document.body.classList.add("keyboard-open");render();
+    syncKeyboardToViewport();keyboard.hidden=false;document.body.classList.add("keyboard-open");render();
     setTimeout(()=>input.scrollIntoView({behavior:"smooth",block:"center"}),30);
   }
 
@@ -167,6 +183,9 @@
     else{replaceSelection(key);if(layout==="letters"&&shifted){shifted=false;render();}}
   });
   keyboard.addEventListener("pointerdown",event=>{if(event.target.closest("button"))event.preventDefault();});
+  window.addEventListener("resize",syncKeyboardToViewport);
+  window.visualViewport?.addEventListener("resize",syncKeyboardToViewport);
+  window.visualViewport?.addEventListener("scroll",syncKeyboardToViewport);
   toolbarDone.addEventListener("click",pressAction);
   document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!keyboard.hidden)closeKeyboard();});
   document.addEventListener("pointerdown",event=>{
